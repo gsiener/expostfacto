@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  api-tests:
+    name: API Tests (Ruby/Rails)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.10'
+          bundler-cache: true
+          working-directory: api
+
+      - name: Set up database
+        working-directory: api
+        run: |
+          bundle exec rake db:create db:migrate
+        env:
+          RAILS_ENV: test
+
+      - name: Run RSpec tests
+        working-directory: api
+        run: bundle exec rspec
+        env:
+          RAILS_ENV: test
+
+  web-tests:
+    name: Web Tests (React/Jest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.5'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci --legacy-peer-deps
+
+      - name: Run Jest tests
+        working-directory: web
+        run: npm test
+        env:
+          CI: true
+
+  lint:
+    name: Lint (ESLint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.5'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci --legacy-peer-deps
+
+      - name: Run ESLint
+        working-directory: web
+        run: npm run lint
