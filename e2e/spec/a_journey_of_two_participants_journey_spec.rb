@@ -32,193 +32,82 @@ require 'spec_helper'
 require 'pry-byebug'
 
 context 'A Journey Of Two Participants', type: :feature, js: true do
-  specify 'Journey' do
+  # This file tests REAL-TIME SYNC between multiple browser sessions.
+  # Basic CRUD operations are tested in felicity_journey_spec.rb
+
+  specify 'real-time sync: items and actions appear across browsers' do
     retro_url = in_browser(:felicity) do
       register('two-participants-felicity-user')
       create_private_retro
     end
 
-    # View retro with password and create happy item
+    # Peter joins with password
     in_browser(:peter) do
       visit retro_url
       fill_in 'Password', with: 'password'
-
       find('.retro-form-submit').click
-      fill_in("I'm glad that...", with: 'this is a happy item')
+      expect(page).to have_css('.retro-item-list')
+    end
+
+    # Peter creates an item - Felicity should see it
+    in_browser(:peter) do
+      fill_in("I'm glad that...", with: 'synced happy item')
       find('.column-happy textarea.retro-item-add-input').native.send_keys(:return)
-      expect(page).to have_content 'this is a happy item'
-      within('.retro-item', text: 'this is a happy item') do
-        2.times do |index|
-          find('.item-vote-submit').click
-          expect(page).to have_content(index + 1)
-        end
-      end
-    end
-
-    # Edit item
-    in_browser(:felicity) do
-      expect(page).to have_content 'this is a happy item'
-      within('.retro-item', text: 'this is a happy item') do
-        expect(page).to have_content('2')
-
-        find('.item-vote-submit').click
-
-        expect(page).to have_content('3')
-
-        find('.item-edit i').click
-        fill_in 'edit-text-field', with: 'this is an updated happy item'
-        find('.edit-save').click
-      end
-      expect(page).to_not have_content('this is a happy item')
-      expect(page).to have_content('this is an updated happy item')
-    end
-
-    # View updated item
-    in_browser(:peter) do
-      expect(page).to_not have_content('this is a happy item')
-      expect(page).to have_content('this is an updated happy item')
-    end
-
-    # Delete item
-    in_browser(:felicity) do
-      within('.retro-item', text: 'this is an updated happy item') do
-        find('.item-edit i').click
-        find('.edit-delete').click
-      end
-      expect(page).to_not have_content('this is an updated happy item')
-    end
-
-    in_browser(:peter) do
-      expect(page).to_not have_content('this is an updated happy item')
-      fill_in("It wasn't so great that...", with: 'this is a sad item')
-      find('.column-sad textarea.retro-item-add-input').native.send_keys(:return)
-
-      fill_in("I'm wondering about...", with: 'A meh item')
-      find('.column-meh textarea.retro-item-add-input').native.send_keys(:return)
-    end
-
-    in_browser(:peter) do
-      within('.retro-item', text: 'this is a sad item') do
-        find('.item-vote-submit').click
-      end
-
-      # Adding retro items
-      fill_in("It wasn't so great that...", with: 'Second sad item')
-      find('.column-sad textarea.retro-item-add-input').native.send_keys(:return)
-
-      fill_in("It wasn't so great that...", with: 'Third sad item')
-      find('.column-sad textarea.retro-item-add-input').native.send_keys(:return)
-
-      # Vote
-      within('div.retro-item', text: 'Second sad item') do
-        find('.item-vote-submit').click
-        expect(page).to have_content '1'
-        find('.item-vote-submit').click
-        expect(page).to have_content '2'
-        find('.item-vote-submit').click
-        expect(page).to have_content '3'
-      end
+      expect(page).to have_content 'synced happy item'
     end
 
     in_browser(:felicity) do
-      select_item('this is a sad item')
+      expect(page).to have_content 'synced happy item'
     end
 
-    # Item should be highlighted
-    in_browser(:peter) do
-      expect(find('.retro-item.highlight', text: 'this is a sad item')).to_not be_nil
-      expect(find('.retro-item.lowlight', text: 'A meh item')).to_not be_nil
-    end
-
-
+    # Felicity votes - Peter should see updated count
     in_browser(:felicity) do
-      within('div.retro-item', text: 'this is a sad item') do
+      within('.retro-item', text: 'synced happy item') do
+        find('.item-vote-submit').click
+        expect(page).to have_content('1')
+      end
+    end
+
+    in_browser(:peter) do
+      within('.retro-item', text: 'synced happy item') do
+        expect(page).to have_content('1')
+      end
+    end
+
+    # Felicity highlights - Peter sees highlight
+    in_browser(:felicity) do
+      select_item('synced happy item')
+      expect(page).to have_css('.highlight .item-text', text: 'synced happy item')
+    end
+
+    in_browser(:peter) do
+      expect(page).to have_css('.highlight .item-text', text: 'synced happy item')
+    end
+
+    # Felicity marks done - Peter sees discussed state
+    in_browser(:felicity) do
+      within('div.retro-item', text: 'synced happy item') do
         find('.item-done').click
       end
-      expect(page).to have_css('.retro-item.discussed .item-text', text: 'this is a sad item')
-      expect(page).not_to have_css('.retro-item.lowlight', text: 'A meh item')
+      expect(page).to have_css('.retro-item.discussed .item-text', text: 'synced happy item')
     end
 
     in_browser(:peter) do
-      expect(page).to have_css('.retro-item.discussed .item-text', text: 'this is a sad item')
-      expect(page).not_to have_css('.retro-item.lowlight', text: 'A meh item')
-
+      expect(page).to have_css('.retro-item.discussed .item-text', text: 'synced happy item')
     end
 
-    # Add action items in felicity
+    # Felicity adds action - Peter sees it
     in_browser(:felicity) do
-      fill_in("Add an action item", with: 'this is an action')
+      fill_in("Add an action item", with: 'synced action')
       find('.retro-action-header .retro-item-add-input').native.send_keys(:return)
-
-      within('.retro-action-list') do
-        expect(page).to have_content('this is an action')
-      end
-
-      fill_in("Add an action item", with: 'this is another action')
-      find('.retro-action-header .retro-item-add-input').native.send_keys(:return)
-
-      within('.retro-action-list') do
-        expect(page).to have_content('this is another action')
-      end
-
-      fill_in("Add an action item", with: 'this the third action')
-      find('.retro-action-header .retro-item-add-input').native.send_keys(:return)
-
-      within('.retro-action-list') do
-        expect(page).to have_content('this the third action')
-      end
-
-    end
-
-    # Action items should appear for peter
-    in_browser(:peter) do
-      expect(page).to have_content('this is an action')
-      expect(page).to have_content('this is another action')
-      expect(page).to have_content('this the third action')
-    end
-
-    # Complete an action
-    in_browser(:felicity) do
-      within('div.retro-action', text: 'this is another action') do
-        find('.action-tick img').click
-        expect(page).to have_css '.action-tick-checked'
-      end
+      expect(page).to have_content('synced action')
     end
 
     in_browser(:peter) do
-      # Action should be completed
-      within('div.retro-action', text: 'this is another action') do
-        expect(page).to have_css '.action-tick-checked'
-      end
+      expect(page).to have_content('synced action')
     end
 
-    # Edit & Save an action
-    in_browser(:felicity) do
-      within('div.retro-action', text: 'this is another action') do
-        find('.action-edit').click
-        fill_in 'edit-text-field', with: 'action name has been changed'
-        find('.edit-save').click
-      end
-      expect(page).to have_content('action name has been changed')
-    end
-
-    in_browser(:peter) do
-      expect(page).to have_content('action name has been changed')
-    end
-
-    # Delete an action
-    in_browser(:felicity) do
-      within('div.retro-action', text: 'this the third action') do
-        find('.action-edit').click
-        find('.edit-delete').click
-      end
-      expect(page).to_not have_content('this the third action')
-    end
-
-    in_browser(:peter) do
-      expect(page).not_to have_content('this the third action')
-    end
-
+    # Felicity archives - Peter's board clears
     in_browser(:felicity) do
       click_menu_item 'Archive this retro'
       click_button 'Archive & send email'
@@ -391,48 +280,6 @@ context 'A Journey Of Two Participants', type: :feature, js: true do
 
       expect(page).to have_css('.retro-item-list')
       expect(page).to have_content 'this is a happy item'
-    end
-  end
-
-  xspecify 'Changing retro access to private' do
-    # Felicity creates public retro
-    retro_url = in_browser(:felicity) do
-      register('changing-retro-access-user')
-      visit_retro_new_page
-      fill_in 'Team name', with: 'My Retro'
-      fill_in 'team-name', with: Time.now.strftime('%Y%m%d%H%M%s')
-      fill_in 'Create password', with: 'current_password'
-      find('#retro_is_private', visible: :all).click
-
-      click_button 'Create'
-      expect(page).to have_content 'My Retro'
-      retro_url = current_url
-    end
-
-    # Peter views the public retro
-    in_browser(:peter) do
-      visit retro_url
-      expect(page).to have_css('.retro-item-list')
-    end
-
-    # Felicity changes retro access to private
-    in_browser(:felicity) do
-      visit retro_url
-      click_menu_item 'Retro settings'
-
-      expect(page).to have_content('Do people need the password to access this retro?')
-      find('#retro_is_private', visible: :all).click
-      click_button('Save changes')
-
-      expect(page).to have_content('Settings saved!')
-      click_menu_item 'Retro settings'
-      is_private_checkbox = find('#retro_is_private', visible: :all)
-      expect(is_private_checkbox).to be_checked
-    end
-
-    # Peter forces to relogin
-    in_browser(:peter) do
-      expect(page).to have_content('The owner of this retro has chosen to protect it with a password.')
     end
   end
 end

@@ -30,70 +30,68 @@
 #
 require 'spec_helper'
 
-describe 'Alex', type: :feature, js: true do
+describe 'Alex (Admin)', type: :feature, js: true do
+  # Setup test users once before all admin tests
+  before(:all) do
+    # Create users needed for admin tests
+    register('user-with-retros')
+    create_public_retro
+    logout
+
+    register('user-without-retros')
+    logout
+
+    register('old-retro-owner')
+    create_public_retro('Retro needs new owner')
+    register('new-retro-owner')
+    logout
+
+    register('banished-user')
+    create_public_retro('Banished user retro')
+    logout
+
+    register('unwanting-retro-owner')
+    create_public_retro('Not wanted retro')
+    logout
+
+    register('dead-retro-user')
+    create_public_retro('Dead retro')
+    logout
+  end
+
+  before(:each) do
+    login_as_admin
+  end
+
   describe 'on the users page' do
-    context 'when a user has retros' do
-      before(:all) do
-        register('user-with-retros')
-        create_public_retro
-        logout
-      end
+    specify 'cannot delete a user who has retros' do
+      click_on 'Users'
+      fill_in 'q_email', with: 'user-with-retros'
+      click_on 'Filter'
 
-      specify 'can not delete that user' do
-        visit_active_admin_page
+      click_on 'Delete'
+      accept_confirm
 
-        fill_in 'admin_user_email', with: 'admin@example.com'
-        fill_in 'admin_user_password', with: 'secret'
-        click_on 'Login'
-
-        click_on 'Users'
-        fill_in 'q_email', with: 'user-with-retros'
-        click_on 'Filter'
-
-        click_on 'Delete'
-
-        accept_confirm
-
-        expect(page).to have_content 'user-with-retros'
-      end
+      expect(page).to have_content 'user-with-retros'
     end
 
-    context 'when a user does not have retros' do
-      before(:all) do
-        register('user-without-retros')
-        logout
-      end
+    specify 'can delete a user without retros' do
+      click_on 'Users'
 
-      specify 'can delete that user' do
-        visit_active_admin_page
+      expect(page).to have_content 'user-without-retros'
 
-        fill_in 'admin_user_email', with: 'admin@example.com'
-        fill_in 'admin_user_password', with: 'secret'
-        click_on 'Login'
+      fill_in 'Email', with: 'user-without-retros'
+      click_on 'Filter'
+      click_on 'Delete'
 
-        click_on 'Users'
+      accept_confirm
 
-        expect(page).to have_content 'user-without-retros'
-
-        fill_in 'Email', with: 'user-without-retros'
-        click_on 'Filter'
-        click_on 'Delete'
-
-        accept_confirm
-
-        expect(page).to_not have_content 'user-without-retros'
-      end
+      expect(page).to_not have_content 'user-without-retros'
     end
   end
 
   describe 'on the retros page' do
-    specify 'create a new private retro' do
-      visit_active_admin_page
-
-      fill_in 'admin_user_email', with: 'admin@example.com'
-      fill_in 'admin_user_password', with: 'secret'
-      click_on 'Login'
-
+    specify 'can create a new private retro' do
       click_on 'Retros'
       click_on 'New Retro'
 
@@ -111,13 +109,7 @@ describe 'Alex', type: :feature, js: true do
       expect(page).to have_content('My awesome new private retro')
     end
 
-    specify 'create a new public retro' do
-      visit_active_admin_page
-
-      fill_in 'admin_user_email', with: 'admin@example.com'
-      fill_in 'admin_user_password', with: 'secret'
-      click_on 'Login'
-
+    specify 'can create a new public retro' do
       click_on 'Retros'
       click_on 'New Retro'
 
@@ -132,102 +124,63 @@ describe 'Alex', type: :feature, js: true do
       expect(page).to have_content('My awesome new public retro')
     end
 
-    describe 'editing a retro' do
-      specify 'can change the owner to another user' do
-        register('old-retro-owner')
-        create_public_retro('Retro needs new owner')
-        register('new-retro-owner')
-        logout
+    specify 'can change the owner to another user' do
+      click_on 'Retros'
 
-        visit_active_admin_page
-
-        fill_in 'admin_user_email', with: 'admin@example.com'
-        fill_in 'admin_user_password', with: 'secret'
-        click_on 'Login'
-
-        click_on 'Retros'
-
-        within('tr', text: 'Retro needs new owner') do
-          click_on 'Edit'
-        end
-
-        expect(page).to have_content 'Owner Email'
-        expect(find_field('retro_owner_email').value).to eq 'old-retro-owner@example.com'
-
-        fill_in 'retro_owner_email', with: 'new-retro-owner@example.com'
-
-        click_on 'Update Retro'
-
-        first(:link, 'Retros').click
-        fill_in 'q_name', with: 'Retro needs new owner'
-        click_on 'Filter'
-
+      within('tr', text: 'Retro needs new owner') do
         click_on 'Edit'
-
-        expect(page).to have_field('Owner Email', with: 'new-retro-owner@example.com')
       end
 
-      specify 'remove an owner from a retro' do
-        register('banished-user')
-        create_public_retro('Banished user retro')
-        logout
+      expect(page).to have_content 'Owner Email'
+      expect(find_field('retro_owner_email').value).to eq 'old-retro-owner@example.com'
 
-        login_as_admin
+      fill_in 'retro_owner_email', with: 'new-retro-owner@example.com'
 
-        click_on 'Retros'
+      click_on 'Update Retro'
 
-        within('tr', text: 'Banished user retro') do
-          click_link 'Edit'
-        end
+      first(:link, 'Retros').click
+      fill_in 'q_name', with: 'Retro needs new owner'
+      click_on 'Filter'
 
-        fill_in 'Owner Email', with: ''
+      click_on 'Edit'
 
-        click_on 'Update Retro'
-
-        first(:link, 'Retros').click
-
-        within('tr', text: 'Banished user retro') do
-          click_link 'Edit'
-        end
-
-        expect(page).to have_field('Owner Email', with: '')
-      end
-
-      specify 'the new owner email does not match any user' do
-        register('unwanting-retro-owner')
-        create_public_retro('Not wanted retro')
-        logout
-
-        visit_active_admin_page
-
-        fill_in 'admin_user_email', with: 'admin@example.com'
-        fill_in 'admin_user_password', with: 'secret'
-        click_on 'Login'
-
-        click_on 'Retros'
-
-        within('tr', text: 'Not wanted retro') do
-          click_on 'Edit'
-        end
-
-        fill_in 'Owner Email', with: 'wrong@example.com'
-
-        click_on 'Update Retro'
-        expect(page).to have_content 'Could not change owners. User not found by email.'
-      end
+      expect(page).to have_field('Owner Email', with: 'new-retro-owner@example.com')
     end
 
-    specify 'delete a retro' do
-      register('dead-retro-user')
-      create_public_retro('Dead retro')
-      logout
+    specify 'can remove an owner from a retro' do
+      click_on 'Retros'
 
-      visit_active_admin_page
+      within('tr', text: 'Banished user retro') do
+        click_link 'Edit'
+      end
 
-      fill_in 'admin_user_email', with: 'admin@example.com'
-      fill_in 'admin_user_password', with: 'secret'
-      click_on 'Login'
+      fill_in 'Owner Email', with: ''
 
+      click_on 'Update Retro'
+
+      first(:link, 'Retros').click
+
+      within('tr', text: 'Banished user retro') do
+        click_link 'Edit'
+      end
+
+      expect(page).to have_field('Owner Email', with: '')
+    end
+
+    specify 'shows error when new owner email does not match any user' do
+      click_on 'Retros'
+
+      within('tr', text: 'Not wanted retro') do
+        click_on 'Edit'
+      end
+
+      fill_in 'Owner Email', with: 'wrong@example.com'
+
+      click_on 'Update Retro'
+      expect(page).to have_content 'Could not change owners. User not found by email.'
+    end
+
+    specify 'can delete a retro' do
       click_on 'Retros'
 
       within('tr', text: 'Dead retro') do

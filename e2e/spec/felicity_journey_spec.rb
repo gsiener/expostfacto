@@ -206,50 +206,6 @@ context 'Felicity', type: :feature, js: true, if: ENV['USE_MOCK_GOOGLE'] == 'tru
       end
     end
 
-    describe 'archiving a retro' do
-      describe 'summary email option' do
-        xspecify 'is remembered from the last retro' do
-          retro_url = create_public_retro
-
-          visit retro_url
-          fill_in("I'm glad that...", with: 'this is the first item')
-          find('.column-happy textarea.retro-item-add-input').native.send_keys(:return)
-
-          find('div.retro-item', text: 'this is the first item').click
-          within('div.retro-item', text: 'this is the first item') do
-            expect(page).to have_css('.item-done')
-            find('.item-done').click
-          end
-
-          expect(page).to have_content('Archive this retro?')
-          within('.archive-dialog') do
-            expect(page).to have_content('Yes')
-            expect(page).to have_content('Archive & send email')
-          end
-
-          find('#send_archive_email', visible: :all).click
-          click_on 'Archive'
-
-          visit retro_url
-          fill_in("I'm glad that...", with: 'this is the first item')
-          find('.column-happy textarea.retro-item-add-input').native.send_keys(:return)
-
-          find('div.retro-item', text: 'this is the first item').click
-          within('div.retro-item', text: 'this is the first item') do
-            expect(page).to have_css('.item-done')
-
-            sleep(5)
-            find('.item-done').click
-          end
-
-          expect(page).to have_content('Archive this retro?')
-          within('.archive-dialog') do
-            expect(page).to have_content('No')
-            expect(page).to_not have_content('Archive & send email')
-          end
-        end
-      end
-    end
   end
 
   context 'from admin panel' do
