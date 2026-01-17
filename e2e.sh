@@ -34,6 +34,7 @@ BASE_DIR="$(dirname "$0")"
 
 export RAILS_ENV="test"
 export USE_MOCK_GOOGLE=true
+export REACT_APP_USE_MOCK_GOOGLE=true
 export BASE_WEB_URL="http://localhost:4000"
 export RETRO_ADMIN_BASE_URL="http://localhost:4000/admin"
 export GOOGLE_AUTH_ENDPOINT="http://localhost:3100/auth"
