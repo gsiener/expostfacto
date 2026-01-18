@@ -28,12 +28,8 @@
 # You should have received a copy of the GNU Affero General Public License
 #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-mkdir -p "$(pwd)/docker_node_modules"
-
 docker run -it \
   --entrypoint /bin/bash \
-  -p 3000:3000 \
   -p 4000:4000 \
   -v "$(pwd)":/postfacto \
-  -v "$(pwd)/docker_node_modules:/postfacto/web/node_modules" \
-  postfacto/dev:2.7.3-14.16.1
+  postfacto/dev:latest

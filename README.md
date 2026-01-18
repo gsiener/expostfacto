@@ -1,7 +1,7 @@
 # Expostfacto
 [![CI/CD](https://github.com/gsiener/expostfacto/actions/workflows/ci.yml/badge.svg)](https://github.com/gsiener/expostfacto/actions/workflows/ci.yml)
 
-Expostfacto is a modernized fork of [VMware's Postfacto](https://github.com/vmware-archive/postfacto), migrated to Rails 8 with Hotwire. It helps teams run great [retrospectives](https://content.pivotal.io/blog/how-to-run-a-really-good-retrospective) remotely.
+Expostfacto is a modernized fork of [VMware's Postfacto](https://github.com/vmware-archive/postfacto), fully rewritten with Rails 8 and Hotwire. It helps teams run great [retrospectives](https://content.pivotal.io/blog/how-to-run-a-really-good-retrospective) remotely.
 
 > **Name Credit**: The name "Expostfacto" was suggested by [@flavorjones](https://github.com/flavorjones) - a clever play on "ex post facto" meaning "from a thing done afterward."
 
@@ -30,13 +30,26 @@ Retros are designed to help teams improve and that's hard to do without taking a
 
 ## What's New in Expostfacto
 
-This fork modernizes the original Postfacto codebase:
+This fork completely modernizes the original Postfacto codebase:
 
-- 🚀 **Rails 8** - Upgraded from Rails 6.1
-- ⚡ **Hotwire** - Replaced React/Redux frontend with Turbo and Stimulus
-- 🎨 **Tailwind CSS v4** - Modern styling framework
-- 🗄️ **PostgreSQL** - Production-ready database
-- 📦 **Ruby 3.3** - Latest stable Ruby (with Ruby 4.0 support planned)
+- **Rails 8** - Single-stack architecture with no separate frontend build
+- **Hotwire** - Turbo + Stimulus for modern, fast interactions (replaced React/Redux)
+- **Tailwind CSS v4** - Modern utility-first styling
+- **PostgreSQL** - Production-ready database
+- **Ruby 3.3** - Latest stable Ruby
+- **Simplified Deployment** - Single Docker image, no frontend build step
+
+## Quick Start
+
+```bash
+# Install dependencies
+./deps.sh
+
+# Run the application
+./run.sh
+
+# App available at http://localhost:4000
+```
 
 ## Deployment
 

@@ -38,20 +38,21 @@ export RAILS_ENV="development"
 ADMIN_EMAIL="${ADMIN_EMAIL:-email@example.com}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-password}"
 
-INFO=""
-
 USE_MOCK_GOOGLE=false
 if [[ " $* " == *' --no-auth '* ]]; then
-  INFO+="Disabling login capability (create retros via admin interface)"$'\n'
+  echo "Disabling login capability (create retros via admin interface)"
   GOOGLE_OAUTH_CLIENT_ID=""
 elif [[ -n "$GOOGLE_OAUTH_CLIENT_ID" ]]; then
-  echo "Using Google OAuth authentication"$'\n'
+  echo "Using Google OAuth authentication"
 else
-  INFO+="Using mock Google authentication server"$'\n'
-  INFO+=" - specify --no-auth to disable login"$'\n'
-  INFO+=" - set GOOGLE_OAUTH_CLIENT_ID to use real Google OAuth"$'\n'
+  echo "Using mock Google authentication server"
+  echo " - specify --no-auth to disable login"
+  echo " - set GOOGLE_OAUTH_CLIENT_ID to use real Google OAuth"
   USE_MOCK_GOOGLE=true
 fi
+
+export USE_MOCK_GOOGLE
+export GOOGLE_OAUTH_CLIENT_ID
 
 # Migrate database and create Admin user
 
@@ -61,35 +62,23 @@ pushd "$BASE_DIR/api" >/dev/null
   ADMIN_EMAIL="$ADMIN_EMAIL" ADMIN_PASSWORD="$ADMIN_PASSWORD" bundle exec rake admin:create_user
 popd >/dev/null
 
-export USE_MOCK_GOOGLE
-export REACT_APP_USE_MOCK_GOOGLE="$USE_MOCK_GOOGLE"
-export GOOGLE_OAUTH_CLIENT_ID
-export REACT_APP_GOOGLE_OAUTH_CLIENT_ID="$GOOGLE_OAUTH_CLIENT_ID"
+echo ""
+echo "Created admin user '$ADMIN_EMAIL' with password '$ADMIN_PASSWORD'"
+echo "Log in to http://localhost:4000/admin to administer"
+echo ""
+echo "App available at http://localhost:4000/"
+echo ""
 
-# Launch content server for frontend
-
-TMUX_COMMAND="tmux new-session -s postfacto_run npm --prefix=\"\$BASE_DIR/web\" start"
-
-# Launch API
-
-TMUX_COMMAND+=" \; split-window -v /bin/bash -c 'cd \"\$BASE_DIR/api\" && echo \"API\" && bundle exec rails server -b 0.0.0.0 -p 4000 -e \"\$RAILS_ENV\"'"
-
-# Launch mock auth server if needed
+# Start mock google server in background if needed
 
 if [[ "$USE_MOCK_GOOGLE" == "true" ]]; then
   export GOOGLE_AUTH_ENDPOINT="http://localhost:3100/auth"
-  TMUX_COMMAND+=" \; split-window -v npm --prefix=\"\$BASE_DIR/mock-google-server\" start"
+  npm --prefix="$BASE_DIR/mock-google-server" start &
+  MOCK_PID=$!
+  trap "kill $MOCK_PID 2>/dev/null" EXIT
 fi
 
-INFO+=$'\n'
-INFO+="Created admin user '$ADMIN_EMAIL' with password '$ADMIN_PASSWORD'"$'\n'
-INFO+="Log in to http://localhost:4000/admin to administer"$'\n'
-INFO+="App will be available at http://localhost:3000/"$'\n'
-INFO+="Press 'q' to stop all services"
-export INFO
+# Launch API server
 
-clear
-
-TMUX_COMMAND+=" \; split-window -v /bin/bash -c 'echo \"\$INFO\" | less; tmux kill-session -t postfacto_run'"
-TMUX_COMMAND+=" \; select-layout even-vertical"
-/bin/bash -c "$TMUX_COMMAND"
+cd "$BASE_DIR/api"
+bundle exec rails server -b 0.0.0.0 -p 4000 -e "$RAILS_ENV"

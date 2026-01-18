@@ -12,28 +12,10 @@ concurrency:
 
 env:
   RUBY_VERSION: '3.3.6'
-  NODE_VERSION: '18.20.5'
 
 jobs:
-  # Run lint and tests in parallel for speed
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci --legacy-peer-deps
-        working-directory: web
-      - run: npm run lint
-        working-directory: web
-
-  api-test:
-    name: API Tests
+  test:
+    name: Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -70,31 +52,12 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postfacto_test
-        run: bundle exec rspec spec/requests/hotwire spec/model spec/channels spec/domain spec/lib --format progress
-
-  web-test:
-    name: Web Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci --legacy-peer-deps
-        working-directory: web
-      - name: Run tests
-        working-directory: web
-        run: npm test
-        env:
-          CI: true
+        run: bundle exec rake
 
   # Deploy only on master pushes after all tests pass
   deploy:
     name: Deploy to Render
-    needs: [lint, api-test, web-test]
+    needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'

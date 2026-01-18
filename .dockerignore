@@ -3,6 +3,4 @@ design/
 docker_node_modules/
 media/
 package/
-web/build/
-web/node_modules/
 package.zip

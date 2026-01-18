@@ -28,21 +28,12 @@
 #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-FROM node:18.20.5 as front-end
+FROM ruby:3.3.6-alpine
 
-COPY ./web /web
-WORKDIR /web
-
-RUN npm ci --legacy-peer-deps
-RUN npm run build
-
-FROM ruby:4.0.1-alpine
 RUN gem install bundler
 
 COPY ./api /postfacto
 COPY docker/release/entrypoint /
-COPY docker/release/create-admin-user /usr/local/bin
-COPY --from=front-end /web/build /postfacto/client/
 
 WORKDIR /postfacto
 
@@ -69,6 +60,6 @@ ENV RAILS_SERVE_STATIC_FILES true
 ENV GOOGLE_OAUTH_CLIENT_ID ""
 ENV ENABLE_ANALYTICS false
 
-EXPOSE 3000
+EXPOSE 4000
 
 ENTRYPOINT "/entrypoint"
