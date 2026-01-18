@@ -73,10 +73,13 @@ Rails.application.configure do
   # Mount Action Cable outside main process or domain
   # config.action_cable.mount_path = nil
 
+  # Configure ActionCable only if host is provided (skip during asset precompilation)
   host = ActionCableHostProvider.new.host
-  action_cable_configuration = ActionCableConfigurationProvider.new.config(host: host)
-  config.action_cable.url = action_cable_configuration.url
-  config.action_cable.allowed_request_origins = action_cable_configuration.allowed_request_origins
+  if host.present?
+    action_cable_configuration = ActionCableConfigurationProvider.new.config(host: host)
+    config.action_cable.url = action_cable_configuration.url
+    config.action_cable.allowed_request_origins = action_cable_configuration.allowed_request_origins
+  end
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
