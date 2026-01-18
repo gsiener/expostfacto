@@ -8,6 +8,9 @@ class Hotwire::ActionItemsController < Hotwire::BaseController
   def create
     @action_item = @retro.action_items.build(action_item_params)
     if @action_item.save
+      # Broadcast to all connected clients via ActionCable
+      RetrosChannel.broadcast(@retro.reload)
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to retro_path(@retro) }
@@ -19,6 +22,9 @@ class Hotwire::ActionItemsController < Hotwire::BaseController
 
   def update
     if @action_item.update(action_item_params)
+      # Broadcast to all connected clients via ActionCable
+      RetrosChannel.broadcast(@retro.reload)
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to retro_path(@retro) }
@@ -30,6 +36,9 @@ class Hotwire::ActionItemsController < Hotwire::BaseController
 
   def destroy
     @action_item.destroy
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }
@@ -38,6 +47,9 @@ class Hotwire::ActionItemsController < Hotwire::BaseController
 
   def toggle_done
     @action_item.update!(done: !@action_item.done?)
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }

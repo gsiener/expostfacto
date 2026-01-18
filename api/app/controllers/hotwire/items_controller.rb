@@ -8,6 +8,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
   def create
     @item = @retro.items.build(item_params)
     if @item.save
+      # Broadcast to all connected clients via ActionCable
+      RetrosChannel.broadcast(@retro.reload)
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to retro_path(@retro) }
@@ -19,6 +22,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
 
   def update
     if @item.update(item_params)
+      # Broadcast to all connected clients via ActionCable
+      RetrosChannel.broadcast(@retro.reload)
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to retro_path(@retro) }
@@ -30,6 +36,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
 
   def destroy
     @item.destroy
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }
@@ -38,6 +47,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
 
   def vote
     @item.increment!(:vote_count)
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }
@@ -46,6 +58,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
 
   def highlight
     @retro.update!(highlighted_item_id: @item.id)
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }
@@ -55,6 +70,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
   def unhighlight
     @item.update!(done: true)
     @retro.update!(highlighted_item_id: nil)
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }
@@ -65,6 +83,9 @@ class Hotwire::ItemsController < Hotwire::BaseController
     @item.update!(done: !@item.done)
     # Clear highlight if marking as done
     @retro.update!(highlighted_item_id: nil) if @item.done && @retro.highlighted_item_id == @item.id
+    # Broadcast to all connected clients via ActionCable
+    RetrosChannel.broadcast(@retro.reload)
+
     respond_to do |format|
       format.turbo_stream
       format.html { redirect_to retro_path(@retro) }
