@@ -83,7 +83,7 @@
                 placeholder: "I'm glad that...",
                 class: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#51c0b1] focus:border-transparent resize-none",
                 rows: 2,
-                data: { item_form_target: "input" } %>
+                data: { item_form_target: "input", action: "keydown->item-form#submitOnKeydown" } %>
             <div class="mt-2 flex justify-end">
               <%= submit_tag "Add", class: "bg-[#51c0b1] hover:bg-[#45a89b] text-white px-4 py-2 rounded-lg transition-colors cursor-pointer" %>
             </div>
@@ -111,7 +111,7 @@
                 placeholder: "I'm wondering about...",
                 class: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fec722] focus:border-transparent resize-none",
                 rows: 2,
-                data: { item_form_target: "input" } %>
+                data: { item_form_target: "input", action: "keydown->item-form#submitOnKeydown" } %>
             <div class="mt-2 flex justify-end">
               <%= submit_tag "Add", class: "bg-[#fec722] hover:bg-[#e5b31f] text-white px-4 py-2 rounded-lg transition-colors cursor-pointer" %>
             </div>
@@ -139,7 +139,7 @@
                 placeholder: "It wasn't so great that...",
                 class: "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e34e40] focus:border-transparent resize-none",
                 rows: 2,
-                data: { item_form_target: "input" } %>
+                data: { item_form_target: "input", action: "keydown->item-form#submitOnKeydown" } %>
             <div class="mt-2 flex justify-end">
               <%= submit_tag "Add", class: "bg-[#e34e40] hover:bg-[#cc4639] text-white px-4 py-2 rounded-lg transition-colors cursor-pointer" %>
             </div>
@@ -168,7 +168,7 @@
           <%= text_field_tag "action_item[description]", nil,
               placeholder: "Add an action item...",
               class: "flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4BC1B1] focus:border-transparent",
-              data: { action_item_form_target: "input" } %>
+              data: { action_item_form_target: "input", action: "keydown->action-item-form#submitOnKeydown" } %>
           <%= submit_tag "Add", class: "bg-[#4BC1B1] hover:bg-[#45a89b] text-white px-6 py-2 rounded-lg transition-colors cursor-pointer" %>
         </div>
       <% end %>

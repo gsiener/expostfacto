@@ -92,6 +92,13 @@
             this.element.reset()
           }
         }
+
+        submitOnKeydown(event) {
+          if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+            event.preventDefault()
+            this.element.requestSubmit()
+          }
+        }
       })
 
       // Action item form controller - resets form after successful submission
@@ -104,6 +111,13 @@
               this.inputTarget.value = ""
             }
             this.element.reset()
+          }
+        }
+
+        submitOnKeydown(event) {
+          if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+            event.preventDefault()
+            this.element.requestSubmit()
           }
         }
       })
