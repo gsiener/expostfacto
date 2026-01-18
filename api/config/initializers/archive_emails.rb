@@ -35,7 +35,7 @@ ARCHIVE_EMAILS = if Rails.env.production?
                  end
 
 FROM_ADDRESS = if Rails.env.production?
-                 ENV['FROM_ADDRESS']
+                 ENV.fetch('FROM_ADDRESS', nil)
                else
                  'postfacto-test@example.com'
                end

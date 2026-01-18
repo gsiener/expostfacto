@@ -32,6 +32,6 @@ class RedisConfigurationProvider
   def redis_config
     return nil unless ENV['RAILS_ENV'] == 'production'
 
-    ENV['REDIS_URL']
+    ENV.fetch('REDIS_URL', nil)
   end
 end

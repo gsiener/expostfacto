@@ -35,9 +35,9 @@ if ENV['COVERAGE']
     add_filter '/spec/'
     add_filter '/config/'
     formatter SimpleCov::Formatter::MultiFormatter.new([
-      SimpleCov::Formatter::HTMLFormatter,
-      SimpleCov::Formatter::CoberturaFormatter
-    ])
+                                                         SimpleCov::Formatter::HTMLFormatter,
+                                                         SimpleCov::Formatter::CoberturaFormatter
+                                                       ])
   end
 end
 

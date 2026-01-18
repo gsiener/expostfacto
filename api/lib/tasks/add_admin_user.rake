@@ -31,11 +31,11 @@
 namespace :admin do
   desc 'Setup admin user based on ADMIN_EMAIL and ADMIN_PASSWORD env variables'
   task create_user: :environment do
-    unless AdminUser.where(email: ENV['ADMIN_EMAIL']).first
+    unless AdminUser.where(email: ENV.fetch('ADMIN_EMAIL', nil)).first
       AdminUser.create!(
-        email: ENV['ADMIN_EMAIL'],
-        password: ENV['ADMIN_PASSWORD'],
-        password_confirmation: ENV['ADMIN_PASSWORD']
+        email: ENV.fetch('ADMIN_EMAIL', nil),
+        password: ENV.fetch('ADMIN_PASSWORD', nil),
+        password_confirmation: ENV.fetch('ADMIN_PASSWORD', nil)
       )
     end
   end

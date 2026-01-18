@@ -44,7 +44,7 @@ class Item < ActiveRecord::Base
 
   # Override to_partial_path to point to the Hotwire partial
   def to_partial_path
-    "hotwire/items/item"
+    'hotwire/items/item'
   end
 
   # Query scopes for reducing N+1 queries and improving code organization
@@ -64,8 +64,9 @@ class Item < ActiveRecord::Base
 
   before_destroy :clear_highlight
 
-  ransackable attributes: %w[id description category vote_count done created_at updated_at archived_at archived retro_id archive_id],
-              associations: %w[archive retro]
+  ransackable attributes: %w[
+    id description category vote_count done created_at updated_at archived_at archived retro_id archive_id
+  ], associations: %w[archive retro]
 
   def vote!
     increment! :vote_count

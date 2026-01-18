@@ -10,39 +10,36 @@ Postfacto is a free, open-source, self-hosted retrospective collaboration tool d
 
 | Component | Technology | Version |
 |-----------|-----------|---------|
-| **Backend** | Ruby on Rails | 8.x (originally 6.1) |
-| **Frontend** | React + Redux | 17.0.2 |
-| **Language** | Ruby | 4.0.1 |
-| **Node.js** | Node | 18.20.5 |
-| **Database** | SQLite (dev), PostgreSQL/MySQL (prod) | - |
-| **Test Framework (API)** | RSpec | 8.x |
-| **Test Framework (Frontend)** | Jest + Enzyme | - |
+| **Backend** | Ruby on Rails | 8.x |
+| **Frontend** | Hotwire (Turbo + Stimulus) | 8.x |
+| **Styling** | Tailwind CSS | 4.x |
+| **Language** | Ruby | 3.3.6 |
+| **Database** | SQLite (dev), PostgreSQL (prod) | - |
+| **Test Framework** | RSpec | 8.x |
 | **Admin Dashboard** | ActiveAdmin | 2.9+ |
+| **Real-time** | ActionCable + Turbo Streams | - |
 
 ## Project Structure
 
 ```
 /postfacto/
-├── api/                          # Rails API backend (port 4000)
+├── api/                          # Rails application (port 4000)
 │   ├── app/
 │   │   ├── admin/               # ActiveAdmin dashboard
-│   │   ├── controllers/         # REST API controllers
+│   │   ├── controllers/
+│   │   │   └── hotwire/         # Hotwire controllers
 │   │   ├── models/              # Domain models (Retro, Item, ActionItem, User)
 │   │   ├── channels/            # ActionCable WebSocket handlers
+│   │   ├── views/
+│   │   │   ├── hotwire/         # Hotwire ERB views
+│   │   │   └── layouts/         # Layout templates
 │   │   └── domain/              # Business logic
 │   ├── config/                  # Rails configuration
 │   ├── db/                      # Migrations & seeds
 │   └── spec/                    # RSpec tests
 │
-├── web/                          # React frontend (port 3000)
-│   ├── src/
-│   │   ├── components/          # React components
-│   │   ├── redux/               # State management
-│   │   └── api/                 # API client
-│   └── package.json
-│
-├── e2e/                          # End-to-end tests (Capybara/Selenium)
-└── docker/                       # Docker configurations
+├── mock-google-server/          # Mock OAuth for development
+└── docker/                      # Docker configurations
 ```
 
 ## Key Files
@@ -50,8 +47,9 @@ Postfacto is a free, open-source, self-hosted retrospective collaboration tool d
 - `api/app/models/retro.rb` - Main retrospective model
 - `api/app/models/item.rb` - Feedback items (happy/meh/sad)
 - `api/app/models/action_item.rb` - Action items to track
-- `api/config/routes.rb` - API routes under `/api` prefix
-- `web/src/components/` - React UI components
+- `api/config/routes.rb` - Routes configuration
+- `api/app/views/hotwire/` - Hotwire ERB views
+- `api/app/controllers/hotwire/` - Hotwire controllers
 - `.tool-versions` - Ruby and Node version pinning
 
 ## Running the Project
@@ -60,88 +58,66 @@ Postfacto is a free, open-source, self-hosted retrospective collaboration tool d
 
 ```bash
 # Install mise (or asdf) for version management
-# Ruby 3.2.10 and Node 18.20.5 will be auto-installed
+# Ruby 3.3.6 will be auto-installed
 ```
 
-### API (Backend)
+### Running the App
 
 ```bash
-cd api
-bundle install --without production
-RAILS_ENV=development bundle exec rake db:create db:migrate
-bundle exec rails server -p 4000
-```
+# Install dependencies
+./deps.sh
 
-### Web (Frontend)
+# Run the application
+./run.sh
 
-```bash
-cd web
-npm install --legacy-peer-deps
-npm start
+# App available at http://localhost:4000
 ```
 
 ### Running Tests
 
-**API Tests:**
 ```bash
 cd api
 RAILS_ENV=test bundle exec rake db:create db:migrate
 RAILS_ENV=test bundle exec rake
 ```
 
-**Frontend Tests:**
+Or use the test script:
 ```bash
-cd web
-CI=true npm test
-```
-
-**Linting:**
-```bash
-cd web
-npm run lint
+./test.sh
 ```
 
 ## Important Implementation Details
+
+### Hotwire Architecture
+
+The application uses Hotwire (Turbo + Stimulus) for the frontend:
+
+1. **Turbo Drive** - Accelerates page navigation
+2. **Turbo Frames** - Enables partial page updates
+3. **Turbo Streams** - Real-time updates via ActionCable
+4. **Stimulus** - Lightweight JavaScript for interactions
+
+### Real-time Updates
+
+Models broadcast changes via Turbo Streams:
+```ruby
+# In Item model
+broadcasts_to :retro, inserts_by: :prepend, target: ->(item) { "#{item.category}-items" }
+```
 
 ### Rails 8.x Migration Notes
 
 1. **Enum Syntax**: Rails 7+ requires positional argument syntax:
    ```ruby
-   # Old (Rails 6)
-   enum category: { happy: 'happy', meh: 'meh', sad: 'sad' }
-
-   # New (Rails 7+)
    enum :category, { happy: 'happy', meh: 'meh', sad: 'sad' }
    ```
 
-2. **Secrets API**: `Rails.application.secrets.secret_key_base` is deprecated, use `Rails.application.secret_key_base`
-
-3. **alias_attribute**: For non-database attributes, use `alias_method` instead:
-   ```ruby
-   # Instead of: alias_attribute :new_name, :method_name
-   alias_method :new_name, :method_name
-   alias_method :new_name=, :method_name=
-   ```
-
-4. **Ransack 4.x**: Requires explicit allowlisting for searchable attributes:
+2. **Ransack 4.x**: Requires explicit allowlisting for searchable attributes:
    ```ruby
    def self.ransackable_attributes(_auth_object = nil)
      %w[id name ...]
    end
-
-   def self.ransackable_associations(_auth_object = nil)
-     %w[items ...]
-   end
    ```
-
-5. **RSpec Configuration**: Use `fixture_paths` (array) instead of `fixture_path` (string)
-
-### Frontend Notes
-
-1. **node-sass** is deprecated - replaced with **sass** (dart-sass)
-2. **cheerio** pinned to 1.0.0-rc.12 for enzyme compatibility
-3. Use `--legacy-peer-deps` when installing due to material-ui peer dependency conflicts
-4. material-ui 0.20.2 is deprecated - consider migrating to @mui/material
 
 ## Database Schema
 
@@ -152,20 +128,14 @@ Key models:
 - **User**: Retro participants
 - **Archive**: Historical retro data
 
-## API Routes
+## Routes
 
-All API routes are prefixed with `/api`:
-- `POST /api/retros` - Create retrospective
-- `GET /api/retros/:slug` - Get retrospective
-- `POST /api/retros/:retro_id/items` - Create item
-- `POST /api/retros/:retro_id/items/:id/vote` - Vote on item
-- `PATCH /api/retros/:retro_id/items/:id/done` - Mark item done
-
-## Real-time Features
-
-WebSocket communication via ActionCable:
-- `RetrosChannel` - Broadcasts retro updates to connected clients
-- Supports live voting, item creation, and discussion management
+All routes are Hotwire-based (ERB views with Turbo Streams):
+- `GET /` - List retros
+- `GET /retros/:slug` - Show retro
+- `POST /retros/:retro_id/items` - Create item (Turbo Stream response)
+- `POST /retros/:retro_id/items/:id/vote` - Vote on item
+- `PATCH /retros/:retro_id/items/:id/done` - Mark item done
 
 ## Common Tasks
 
@@ -179,19 +149,14 @@ RAILS_ENV=test bundle exec rake db:migrate
 
 ### Running specific tests
 ```bash
-# API
 cd api && RAILS_ENV=test bundle exec rspec spec/path/to/spec.rb
-
-# Frontend
-cd web && npm test -- --testPathPattern="path/to/test"
 ```
 
 ## Deployment
 
-Docker-based deployment via the root `Dockerfile`.
+Single-stage Docker build via the root `Dockerfile`. No frontend build step required.
 
-## Known Issues & Workarounds
-
-1. **Python 3.14+ incompatibility**: Node 14.x cannot be built with modern Python. Use Node 18+.
-2. **material-ui deprecation**: Old material-ui requires React peer dependency override
-3. **Enzyme + cheerio**: Pin cheerio to 1.0.0-rc.12 for compatibility
+```bash
+docker build -t postfacto .
+docker run -p 4000:4000 -e DATABASE_URL=postgres://... postfacto
+```

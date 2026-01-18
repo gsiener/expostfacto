@@ -178,7 +178,7 @@ RSpec.describe 'Hotwire::ArchivesController', type: :request do
 
     context 'archive not found' do
       it 'returns not found status' do
-        get retro_archive_path(retro, id: 99999)
+        get retro_archive_path(retro, id: 99_999)
 
         # Request specs catch the exception and return appropriate HTTP status
         expect(response).to have_http_status(:not_found)

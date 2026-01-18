@@ -37,11 +37,11 @@ class ActionItem < ActiveRecord::Base
   validates :description, presence: true
 
   # Broadcast real-time updates via Turbo Streams to the retro
-  broadcasts_to :retro, inserts_by: :prepend, target: "action-items"
+  broadcasts_to :retro, inserts_by: :prepend, target: 'action-items'
 
   # Override to_partial_path to point to the Hotwire partial
   def to_partial_path
-    "hotwire/action_items/action_item"
+    'hotwire/action_items/action_item'
   end
 
   ransackable attributes: %w[id description done created_at updated_at archived_at archived retro_id archive_id],

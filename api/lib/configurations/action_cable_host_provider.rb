@@ -30,6 +30,6 @@
 #
 class ActionCableHostProvider
   def host
-    ENV['ACTION_CABLE_HOST']
+    ENV.fetch('ACTION_CABLE_HOST', nil)
   end
 end

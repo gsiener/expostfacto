@@ -40,8 +40,9 @@ class Retro < ActiveRecord::Base
   belongs_to :highlighted_item, class_name: 'Item', optional: true
   enum :item_order, { time: 'time', votes: 'votes' }
 
-  ransackable attributes: %w[id name slug is_private video_link created_at updated_at user_id item_order send_archive_email],
-              associations: %w[items action_items archives user]
+  ransackable attributes: %w[
+    id name slug is_private video_link created_at updated_at user_id item_order send_archive_email
+  ], associations: %w[items action_items archives user]
 
   MAX_SLUG_LENGTH = 236
   MAGIC_LINK_EXPIRY = 7.days
@@ -49,7 +50,7 @@ class Retro < ActiveRecord::Base
   friendly_id :generate_slug, use: :slugged
   validates_uniqueness_of :slug
   validates_length_of :slug, maximum: MAX_SLUG_LENGTH
-  validates_format_of :slug, with: /\A[a-zA-z0-9-]+\z/
+  validates_format_of :slug, with: /\A[a-zA-Z0-9-]+\z/
 
   before_update :recompute_join_token, if: :should_recompute_join_token?
 
@@ -65,11 +66,7 @@ class Retro < ActiveRecord::Base
   end
 
   def validate_login?(val)
-    if encrypted_password.blank?
-      true
-    else
-      BCrypt::Engine.hash_secret(val, salt) == encrypted_password
-    end
+    encrypted_password.blank? || BCrypt::Engine.hash_secret(val, salt) == encrypted_password
   end
 
   def validate_join_token?(val)
@@ -92,16 +89,15 @@ class Retro < ActiveRecord::Base
     end
   end
 
-  def magic_link_enabled
+  def magic_link_enabled?
     join_token?
   end
 
-  alias magic_link_enabled? magic_link_enabled
-
   # aliasing this in order to limit changes required to API
   # TODO: change API and front end to refer to this key as just 'magic_link_enabled'
-  alias_method :is_magic_link_enabled, :magic_link_enabled
-  alias_method :is_magic_link_enabled=, :magic_link_enabled=
+  alias magic_link_enabled magic_link_enabled?
+  alias is_magic_link_enabled magic_link_enabled?
+  alias is_magic_link_enabled= magic_link_enabled=
 
   def create_instruction_cards!
     I18n.t('instruction_cards.items').each do |category, descriptions|
