@@ -28,7 +28,7 @@
 #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-require 'rest-client'
+require 'httpx'
 
 class GoogleClient
   def initialize(url, hosted_domain)
@@ -37,8 +37,11 @@ class GoogleClient
   end
 
   def get_user!(access_token)
-    response = RestClient.get(@url, Authorization: "Bearer #{access_token}")
-    user = JSON.parse(response.body, symbolize_names: true)
+    response = HTTPX.get(@url, headers: { 'Authorization' => "Bearer #{access_token}" })
+
+    raise GetUserFailed.new unless response.status == 200
+
+    user = JSON.parse(response.body.to_s, symbolize_names: true)
 
     validate_hosted_domain user
 

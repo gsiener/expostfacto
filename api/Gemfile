@@ -35,20 +35,17 @@ ruby '3.3.6'
 gem 'rails'
 
 gem 'activeadmin'
-gem 'addressable'
 gem 'bcrypt'
 gem 'devise'
 gem 'friendly_id'
+gem 'httpx'
 gem 'inherited_resources'
-gem 'jbuilder'
+gem 'jwt'
 gem 'premailer-rails'
 gem 'puma'
 gem 'rack-cors', require: 'rack/cors'
 gem 'rack-ssl'
-gem 'rest-client'
 gem 'sassc-rails'
-gem 'uglifier'
-gem 'jwt'
 
 # Hotwire stack
 gem 'turbo-rails'
@@ -82,6 +79,5 @@ end
 
 group :production do
   gem 'redis'
-  gem 'mysql2'
   gem 'pg'
 end

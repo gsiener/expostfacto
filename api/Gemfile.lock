@@ -123,7 +123,6 @@ GEM
       warden (~> 1.2.3)
     diff-lcs (1.6.2)
     docile (1.4.1)
-    domain_name (0.6.20240107)
     dotenv (3.2.0)
     dotenv-rails (3.2.0)
       dotenv (= 3.2.0)
@@ -131,7 +130,6 @@ GEM
     drb (2.2.3)
     erb (6.0.1)
     erubi (1.13.1)
-    execjs (2.10.0)
     ffi (1.17.3-arm64-darwin)
     ffi (1.17.3-x86_64-linux-gnu)
     formtastic (5.0.0)
@@ -146,9 +144,9 @@ GEM
       activesupport (>= 7.0)
     hashdiff (1.2.1)
     htmlentities (4.4.2)
-    http-accept (1.7.0)
-    http-cookie (1.1.0)
-      domain_name (~> 0.5)
+    http-2 (1.1.1)
+    httpx (1.7.0)
+      http-2 (>= 1.0.0)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.2.3)
@@ -165,9 +163,6 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    jbuilder (2.14.1)
-      actionview (>= 7.0.0)
-      activesupport (>= 7.0.0)
     jquery-rails (4.6.1)
       rails-dom-testing (>= 1, < 3)
       railties (>= 4.2.0)
@@ -205,15 +200,9 @@ GEM
       net-smtp
     marcel (1.1.0)
     method_source (1.1.0)
-    mime-types (3.7.0)
-      logger
-      mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2026.0113)
     mini_mime (1.1.5)
     minitest (6.0.1)
       prism (~> 1.5)
-    mysql2 (0.5.7)
-      bigdecimal
     net-imap (0.6.2)
       date
       net-protocol
@@ -223,7 +212,6 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
-    netrc (0.11.0)
     nio4r (2.7.5)
     nokogiri (1.19.0-arm64-darwin)
       racc (~> 1.4)
@@ -328,11 +316,6 @@ GEM
     responders (3.2.0)
       actionpack (>= 7.0)
       railties (>= 7.0)
-    rest-client (2.1.0)
-      http-accept (>= 1.7.0, < 2.0)
-      http-cookie (>= 1.0.2, < 2.0)
-      mime-types (>= 1.16, < 4.0)
-      netrc (~> 0.8)
     rexml (3.4.4)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
@@ -418,8 +401,6 @@ GEM
       concurrent-ruby (~> 1.0)
     tzinfo-data (1.2025.3)
       tzinfo (>= 1.0.0)
-    uglifier (4.2.1)
-      execjs (>= 0.3.0, < 3)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
@@ -450,19 +431,17 @@ PLATFORMS
 DEPENDENCIES
   action-cable-testing
   activeadmin
-  addressable
   bcrypt
   bullet
   climate_control
   devise
   dotenv-rails
   friendly_id
+  httpx
   importmap-rails
   inherited_resources
-  jbuilder
   jwt
   listen
-  mysql2
   pg
   premailer-rails
   pry
@@ -472,7 +451,6 @@ DEPENDENCIES
   rack-ssl
   rails
   redis
-  rest-client
   rspec-rails
   rspec_junit_formatter
   rubocop
@@ -486,7 +464,6 @@ DEPENDENCIES
   tailwindcss-rails
   turbo-rails
   tzinfo-data
-  uglifier
   web-console
   webmock
 
