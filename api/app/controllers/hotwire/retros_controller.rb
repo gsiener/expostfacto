@@ -39,7 +39,7 @@ module Hotwire
     def update
       if @retro.update(retro_params)
         # Broadcast to all connected clients via ActionCable
-        RetrosChannel.broadcast(@retro.reload)
+        InstrumentedBroadcastService.broadcast_retro_update(@retro.reload)
         redirect_to retro_path(@retro), notice: 'Settings saved!'
       else
         render :edit, status: :unprocessable_entity
@@ -49,7 +49,7 @@ module Hotwire
     def archive
       RetroArchiveService.archive(@retro, Time.current, false)
       # Broadcast to all connected clients via ActionCable
-      RetrosChannel.broadcast(@retro.reload)
+      InstrumentedBroadcastService.broadcast_retro_update(@retro.reload)
       redirect_to retro_path(@retro), notice: 'Archived!'
     end
 

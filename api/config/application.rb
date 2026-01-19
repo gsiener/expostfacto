@@ -54,6 +54,13 @@ module RetroApp
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
     config.autoload_paths << Rails.root.join('lib', 'configurations')
+
+    # OpenTelemetry custom middleware for business context
+    if ENV.fetch('OTEL_INSTRUMENTATION_ACTIVE', 'false') == 'true'
+      require_relative '../app/middleware/opentelemetry_middleware'
+      config.middleware.use OpentelemetryMiddleware
+    end
+
     # React client middleware removed - using Hotwire now
   end
 end

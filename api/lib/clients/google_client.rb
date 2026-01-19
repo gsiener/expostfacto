@@ -37,6 +37,52 @@ class GoogleClient
   end
 
   def get_user!(access_token)
+    return get_user_without_instrumentation!(access_token) unless instrumentation_enabled?
+
+    tracer = OpenTelemetry.tracer_provider.tracer('postfacto.http_client')
+    tracer.in_span('http.google_oauth.get_user', kind: :client) do |span|
+      # Add HTTP attributes
+      span.set_attribute('http.method', 'GET')
+      span.set_attribute('http.url', @url)
+      span.set_attribute('http.target', 'google_oauth')
+
+      begin
+        response = HTTPX.get(@url, headers: { 'Authorization' => "Bearer #{access_token}" })
+
+        # Add response attributes
+        span.set_attribute('http.status_code', response.status)
+        span.set_attribute('http.response_content_length', response.body.to_s.bytesize)
+
+        raise GetUserFailed.new unless response.status == 200
+
+        user = JSON.parse(response.body.to_s, symbolize_names: true)
+
+        validate_hosted_domain user
+
+        # Add user domain if available
+        span.set_attribute('user.domain', user[:hd]) if user[:hd]
+
+        span.status = OpenTelemetry::Trace::Status.ok
+        user
+      rescue InvalidUserDomain => e
+        span.record_exception(e)
+        span.status = OpenTelemetry::Trace::Status.error('Invalid user domain')
+        span.set_attribute('error.type', 'InvalidUserDomain')
+        raise e
+      rescue GetUserFailed => e
+        span.record_exception(e)
+        span.status = OpenTelemetry::Trace::Status.error('Failed to get user from Google')
+        span.set_attribute('error.type', 'GetUserFailed')
+        raise e
+      rescue StandardError => e
+        span.record_exception(e)
+        span.status = OpenTelemetry::Trace::Status.error('Unexpected error')
+        raise GetUserFailed.new
+      end
+    end
+  end
+
+  def get_user_without_instrumentation!(access_token)
     response = HTTPX.get(@url, headers: { 'Authorization' => "Bearer #{access_token}" })
 
     raise GetUserFailed.new unless response.status == 200
@@ -50,6 +96,11 @@ class GoogleClient
     raise e
   rescue StandardError
     raise GetUserFailed.new
+  end
+
+  def instrumentation_enabled?
+    ENV.fetch('OTEL_INSTRUMENTATION_ACTIVE', 'false') == 'true' &&
+      defined?(OpenTelemetry)
   end
 
   def validate_hosted_domain(user)

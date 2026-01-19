@@ -30,6 +30,7 @@
 #
 class Item < ActiveRecord::Base
   include Ransackable
+  include OpentelemetryInstrumentedModel
 
   belongs_to :retro, optional: true
   belongs_to :archive, optional: true
@@ -73,6 +74,14 @@ class Item < ActiveRecord::Base
   end
 
   private
+
+  def add_model_attributes(span)
+    span.set_attribute('item.id', id) if id.present?
+    span.set_attribute('item.category', category)
+    span.set_attribute('item.vote_count', vote_count)
+    span.set_attribute('item.done', done)
+    span.set_attribute('retro.id', retro_id) if retro_id.present?
+  end
 
   def clear_highlight
     return unless retro&.highlighted_item_id == id

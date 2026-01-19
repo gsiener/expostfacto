@@ -34,6 +34,7 @@
 require 'security/auth_token'
 
 class RetrosChannel < ApplicationCable::Channel
+  include OpentelemetryInstrumented
 
   def self.broadcast(retro)
     broadcast_to retro, retro: RetroSerializer.new(retro).as_json
@@ -73,6 +74,10 @@ class RetrosChannel < ApplicationCable::Channel
   end
 
   private
+
+  def retro_id
+    params[:retro_id]
+  end
 
   def user_allowed_to_access_retro?(retro, api_token)
     return true unless retro.is_private?

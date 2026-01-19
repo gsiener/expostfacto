@@ -114,6 +114,12 @@ Rails.application.configure do
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.log_formatter = Logger::Formatter.new
 
+  # Wrap logger formatter with OpenTelemetry log processor for trace correlation
+  if ENV.fetch('OTEL_INSTRUMENTATION_ACTIVE', 'false') == 'true'
+    require_relative '../../lib/opentelemetry/log_processor'
+    config.log_formatter = OpenTelemetry::LogProcessor.new(config.log_formatter)
+  end
+
   # Use a different logger for distributed setups.
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')

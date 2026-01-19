@@ -39,6 +39,7 @@ module Hotwire
 
     def vote
       @item.increment!(:vote_count)
+      TelemetryMetricsCollector.record_vote(@item)
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to retro_path(@retro) }

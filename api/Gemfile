@@ -47,6 +47,12 @@ gem 'rack-cors', require: 'rack/cors'
 gem 'rack-ssl'
 gem 'sassc-rails'
 
+# OpenTelemetry instrumentation
+gem 'opentelemetry-sdk'
+gem 'opentelemetry-exporter-otlp'
+gem 'opentelemetry-instrumentation-all'
+gem 'opentelemetry-semantic_conventions'
+
 # Hotwire stack
 gem 'turbo-rails'
 gem 'stimulus-rails'
