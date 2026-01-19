@@ -14,7 +14,7 @@ module Hotwire
           format.html { redirect_to retro_path(@retro) }
         end
       else
-        head :unprocessable_entity
+        head :unprocessable_content
       end
     end
 
@@ -25,7 +25,7 @@ module Hotwire
           format.html { redirect_to retro_path(@retro) }
         end
       else
-        head :unprocessable_entity
+        head :unprocessable_content
       end
     end
 

@@ -88,7 +88,7 @@ RSpec.describe 'Hotwire::RetrosController', type: :request do
       it 'renders the new form with errors' do
         post retros_path, params: invalid_params
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
@@ -100,7 +100,7 @@ RSpec.describe 'Hotwire::RetrosController', type: :request do
           post retros_path, params: { retro: { name: 'New Retro', slug: 'existing-slug' } }
         end.not_to change(Retro, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

@@ -121,7 +121,7 @@ RSpec.describe 'Hotwire::ItemsController', type: :request do
           post retro_items_path(retro), params: invalid_params
         end.not_to change(Item, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

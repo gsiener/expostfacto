@@ -42,7 +42,7 @@ RSpec.describe 'Hotwire::SessionsController', type: :request do
         it 'renders the login page with error' do
           post retro_session_path(private_retro), params: { password: 'wrongpassword' }
 
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
 
         it 'shows error message' do
@@ -64,7 +64,7 @@ RSpec.describe 'Hotwire::SessionsController', type: :request do
         it 'renders the login page with error' do
           post retro_session_path(private_retro), params: { password: '' }
 
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:unprocessable_content)
         end
       end
     end

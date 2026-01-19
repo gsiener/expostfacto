@@ -29,7 +29,7 @@ module Hotwire
         mark_retro_authenticated!(@retro)
         redirect_to retro_path(@retro), notice: 'Retro created!'
       else
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 
@@ -42,7 +42,7 @@ module Hotwire
         InstrumentedBroadcastService.broadcast_retro_update(@retro.reload)
         redirect_to retro_path(@retro), notice: 'Settings saved!'
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 

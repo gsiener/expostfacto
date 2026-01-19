@@ -14,7 +14,7 @@ module Hotwire
         redirect_to retro_path(@retro)
       else
         flash.now[:alert] = 'Incorrect password'
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
       end
     end
 

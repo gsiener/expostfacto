@@ -80,7 +80,7 @@ RSpec.describe 'Hotwire::ActionItemsController', type: :request do
 
         # If no validations, it will create anyway; if validations, it will fail
         expect(response).to(
-          have_http_status(:redirect).or(have_http_status(:ok)).or(have_http_status(:unprocessable_entity))
+          have_http_status(:redirect).or(have_http_status(:ok)).or(have_http_status(:unprocessable_content))
         )
       end
     end
